@@ -109,7 +109,7 @@
     <div class="small">
       <p>
         Built for interactive demonstration of the <strong>Greenshields Traffic Flow Model</strong>.<br>
-        Please cite as:<br>
+       You may use the demonstration for teaching or research purposes, but please cite as:<br>
         <em>Ollero, L. J. (2025). Traffic Flow Theory: Greenshields Model Interactive Visualization.</em><br>
         Available at:
         <a href="https://lesterjayollero.github.io/TrafficFlowTheory.github.io" target="_blank">
@@ -151,7 +151,7 @@
         <div style="margin-top:10px">
           <div class="control-row">
             <label for="vf">Free-flow speed (u<sub>f</sub>)</label>
-            <input id="vf" type="number" min="10" max="200" step="1" value="60"> <span class="small" style="margin-left:8px">km/h</span>
+            <input id="vf" type="number" min="10" max="200" step="1" value="60"> <span class="small" style="margin-left:8px">km/hrr</span>
           </div>
 
           <div class="control-row" style="margin-top:8px">
@@ -179,15 +179,15 @@
             <button id="playBtn">Play</button>
             <button id="pauseBtn" class="secondary">Pause</button>
           </div>
-          <div style="margin-left:auto" class="small" id="oper-info">v = — km/h • q = — veh/h</div>
+          <div style="margin-left:auto" class="small" id="oper-info">u = — km/hr • q = — veh/hr</div>
         </div>
       </div>
 
       <div class="card">
         <div><strong>Notes</strong></div>
         <div class="small" style="margin-top:8px">
-          - Greenshields is linear; maximum flow occurs at k = k<sub>j</sub>/2 for this model (q_max = v_f * k_j / 4).<br>
-          - Vehicle animation uses v(k) converted to m/s to move vehicles on the loop. Vehicle count = round(k * L).
+          - Greenshields is linear; maximum flow occurs at k = k<sub>j</sub>/2 for this model (q_max = u_f * k_j / 4).<br>
+          - Vehicle animation uses u(k) converted to m/s to move vehicles on the loop. Vehicle count = round(k * L).
         </div>
       </div>
     </div>
@@ -267,7 +267,7 @@ let playAnimation = false;
 let lastTime = performance.now();
 
 // default parameters
-let vf = Number(vfInput.value); // km/h
+let vf = Number(vfInput.value); // km/hr
 let kj = Number(kjInput.value); // veh/km
 let roadLen = Number(roadLenInput.value); // km
 let density = Number(densityRange.value); // veh/km
@@ -289,7 +289,7 @@ function greenshields_v(k, vf_local, kj_local){
 function computeSeries(vf_local, kj_local){
   const ks = linspace(0, kj_local, 201);
   const vs = ks.map(k => greenshields_v(k, vf_local, kj_local));
-  const qs = ks.map((k,i) => k * vs[i]); // veh * km/h per km -> veh/h
+  const qs = ks.map((k,i) => k * vs[i]); // veh * km/hr per km -> veh/hr
   return { ks, vs, qs };
 }
 
@@ -310,7 +310,7 @@ function drawPlots(){
 
   const layoutVK = {
     title: 'Speed vs Density (v(k))',
-    margin:{t:40,l:50,r:10,b:40}, xaxis:{title:'density k (veh/km)'}, yaxis:{title:'speed v (km/h)'},
+    margin:{t:40,l:50,r:10,b:40}, xaxis:{title:'density k (veh/km)'}, yaxis:{title:'speed v (km/hr)'},
     height: 280
   };
 
@@ -319,13 +319,13 @@ function drawPlots(){
   // Speed vs Volume: parametric by density -> v on y, q on x
   const vqTrace = { x: qs, y: vs, mode:'lines', line:{color:'#0ea5e9'}, name:'v(q)' };
   const vqPoint = { x:[density * greenshields_v(density, vf, kj)], y:[greenshields_v(density, vf, kj)], mode:'markers', marker:{size:10,color:'#034ea2'}, name:'operating' };
-  const layoutVQ = { title:'Speed vs Volume (v(q))', margin:{t:40,l:50,r:10,b:40}, xaxis:{title:'volume q (veh/h)'}, yaxis:{title:'speed v (km/h)'}, height: 280 };
+  const layoutVQ = { title:'Speed vs Volume (v(q))', margin:{t:40,l:50,r:10,b:40}, xaxis:{title:'volume q (veh/hr)'}, yaxis:{title:'speed v (km/hr)'}, height: 280 };
   Plotly.newPlot(plotVQ, [vqTrace, vqPoint], layoutVQ, {displayModeBar:false});
 
   // Volume vs Density q(k)
   const qkTrace = { x: ks, y: qs, mode:'lines', line:{color:'#0ea5e9'}, name:'q(k)' };
   const qkPoint = { x:[density], y:[density * greenshields_v(density, vf, kj)], mode:'markers', marker:{size:10,color:'#034ea2'}, name:'operating' };
-  const layoutQK = { title:'Volume vs Density (q(k))', margin:{t:40,l:50,r:10,b:40}, xaxis:{title:'density k (veh/km)'}, yaxis:{title:'volume q (veh/h)'}, height: 260 };
+  const layoutQK = { title:'Volume vs Density (q(k))', margin:{t:40,l:50,r:10,b:40}, xaxis:{title:'density k (veh/km)'}, yaxis:{title:'volume q (veh/hr)'}, height: 260 };
   Plotly.newPlot(plotQK, [qkTrace, qkPoint], layoutQK, {displayModeBar:false});
 }
 
@@ -338,20 +338,20 @@ function updatePlots(){
   Plotly.react(plotVK, [
     { x: ks, y: vs, mode:'lines', line:{color:'#0ea5e9'} },
     { x: [density], y: [curV], mode:'markers', marker:{size:10,color:'#034ea2'} }
-  ], { title:'Speed vs Density (v(k))', margin:{t:40,l:50,r:10,b:40}, xaxis:{title:'density k (veh/km)'}, yaxis:{title:'speed v (km/h)'}, height: 280 }, {displayModeBar:false});
+  ], { title:'Speed vs Density (v(k))', margin:{t:40,l:50,r:10,b:40}, xaxis:{title:'density k (veh/km)'}, yaxis:{title:'speed v (km/hr)'}, height: 280 }, {displayModeBar:false});
 
   Plotly.react(plotVQ, [
     { x: qs, y: vs, mode:'lines', line:{color:'#0ea5e9'} },
     { x: [curQ], y: [curV], mode:'markers', marker:{size:10,color:'#034ea2'} }
-  ], { title:'Speed vs Volume (v(q))', margin:{t:40,l:50,r:10,b:40}, xaxis:{title:'volume q (veh/h)'}, yaxis:{title:'speed v (km/h)'}, height: 280 }, {displayModeBar:false});
+  ], { title:'Speed vs Volume (v(q))', margin:{t:40,l:50,r:10,b:40}, xaxis:{title:'volume q (veh/hr)'}, yaxis:{title:'speed v (km/hr)'}, height: 280 }, {displayModeBar:false});
 
   Plotly.react(plotQK, [
     { x: ks, y: qs, mode:'lines', line:{color:'#0ea5e9'} },
     { x: [density], y: [curQ], mode:'markers', marker:{size:10,color:'#034ea2'} }
-  ], { title:'Volume vs Density (q(k))', margin:{t:40,l:50,r:10,b:40}, xaxis:{title:'density k (veh/km)'}, yaxis:{title:'volume q (veh/h)'}, height: 260 }, {displayModeBar:false});
+  ], { title:'Volume vs Density (q(k))', margin:{t:40,l:50,r:10,b:40}, xaxis:{title:'density k (veh/km)'}, yaxis:{title:'volume q (veh/hr)'}, height: 260 }, {displayModeBar:false});
 
   // Update status text
-  operInfo.textContent = `v = ${curV.toFixed(2)} km/h • q = ${curQ.toFixed(1)} veh/h`;
+  operInfo.textContent = `v = ${curV.toFixed(2)} km/hr • q = ${curQ.toFixed(1)} veh/hr`;
   statusDensity.textContent = `Density: ${density.toFixed(0)} veh/km`;
 }
 
@@ -410,7 +410,7 @@ function drawRoad(){
 
   // draw vehicles
   const curV_kmh = greenshields_v(density, vf, kj);
-  // convert to m/s: km/h * 1000 / 3600
+  // convert to m/s: km/hr * 1000 / 3600
   const curV_ms = curV_kmh * 1000 / 3600;
 
   // We need scaling between real length (roadLen km) to loop circumference (px)
@@ -452,7 +452,7 @@ function drawRoad(){
   roadCtx.font = '13px Inter, Arial';
   const curQ = density * curV_kmh;
   roadCtx.fillText(`k = ${density.toFixed(0)} veh/km`, 20, 30);
-  roadCtx.fillText(`v = ${curV_kmh.toFixed(2)} km/h`, 20, 46);
+  roadCtx.fillText(`v = ${curV_kmh.toFixed(2)} km/hr`, 20, 46);
   roadCtx.restore();
 }
 
