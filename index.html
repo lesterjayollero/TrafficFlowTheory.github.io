@@ -94,6 +94,14 @@
       #plots { grid-template-columns: 1fr; }
     }
   </style>
+  <!-- MathJax for LaTeX rendering -->
+<script>
+  MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 </head>
 <body>
   <div style="max-width:1100px;margin:0 auto 18px;">
@@ -185,6 +193,82 @@
 
     </div>
   </div>
+
+  <!-- Greenshields Model Derivation (with MathJax LaTeX equations) -->
+<div class="card" style="margin:40px auto; max-width:1100px;">
+  <h2>The Greenshields Model (1935)</h2>
+  <p>
+    The Greenshields Model (1935) is the earliest and most fundamental relationship in traffic flow theory.
+    It assumes a <strong>linear relationship</strong> between vehicle speed and traffic density.
+    From this assumption, we can derive the three fundamental diagrams that describe the behavior of a traffic stream.
+  </p>
+
+  <h3>1) Greenshields Basic Assumption</h3>
+  <p>
+    Greenshields assumed a linear relation between speed $u$ and density $k$:
+  </p>
+  <p style="text-align:center;">
+    $$u(k) = u_f\left(1 - \frac{k}{k_j}\right)$$
+  </p>
+  <ul>
+    <li>$u_f$ = free-flow speed (speed at near zero density)</li>
+    <li>$k_j$ = jam density (density at which speed = 0)</li>
+  </ul>
+
+  <h3>2) Flow as Function of Density</h3>
+  <p>
+    Flow (volume) is $q = k \cdot u$. Substituting the speed–density relation:
+  </p>
+  <p style="text-align:center;">
+    $$q(k) = u_f k \left(1 - \frac{k}{k_j}\right) = u_f k - \frac{u_f}{k_j}k^2$$
+  </p>
+  <p>
+    This is a concave quadratic in $k$ (a parabola opening downward).  
+    To find maximum flow:
+  </p>
+  <p style="text-align:center;">
+    $$\frac{dq}{dk} = u_f - 2\frac{u_f}{k_j}k = 0 \quad \Rightarrow \quad k^* = \frac{k_j}{2}$$
+  </p>
+  <p>
+    Thus, the <strong>critical density</strong> (density at maximum flow) is $k^* = \frac{k_j}{2}$.  
+    The speed at that point is:
+  </p>
+  <p style="text-align:center;">
+    $$u^* = u_f\left(1 - \frac{k^*}{k_j}\right) = \frac{u_f}{2}$$
+  </p>
+  <p>
+    The maximum flow is:
+  </p>
+  <p style="text-align:center;">
+    $$q_{\max} = \frac{u_f k_j}{4}$$
+  </p>
+
+  <h3>3) Flow as Function of Speed</h3>
+  <p>
+    Solve density from the linear relation:
+  </p>
+  <p style="text-align:center;">
+    $$k = k_j\left(1 - \frac{u}{u_f}\right)$$
+  </p>
+  <p>
+    Substitute into $q = k \cdot u$:
+  </p>
+  <p style="text-align:center;">
+    $$q(u) = k_j u \left(1 - \frac{u}{u_f}\right) = k_j\left(u - \frac{u^2}{u_f}\right)$$
+  </p>
+  <p>
+    This is also a concave parabola in $u$, with maximum at $u^* = \frac{u_f}{2}$ and
+    $q_{\max} = \frac{u_f k_j}{4}$.
+  </p>
+
+  <h3>Summary of Fundamental Relations</h3>
+  <p>
+    1️⃣ $u(k) = u_f\left(1 - \frac{k}{k_j}\right)$ <br>
+    2️⃣ $q(k) = u_f k\left(1 - \frac{k}{k_j}\right)$ <br>
+    3️⃣ $q(u) = k_j u\left(1 - \frac{u}{u_f}\right)$ <br><br>
+    Critical points: $k^* = \frac{k_j}{2}, \; u^* = \frac{u_f}{2}, \; q_{\max} = \frac{u_f k_j}{4}$.
+  </p>
+</div>
 
 <script>
 
