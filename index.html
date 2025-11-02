@@ -3,305 +3,201 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Greenshields Model — Interactive</title>
-  <meta name="description" content="Interactive Greenshields fundamental diagram with animated vehicles and live plots (speed vs density, speed vs volume, volume vs density)." />
-  <script src="https://cdn.plot.ly/plotly-2.26.1.min.js"></script>
+  <title>Greenshields Model — Interactive Demo</title>
   <style>
-    :root{
-      --bg: #f8fafc;
-      --card: #ffffff;
-      --muted: #6b7280;
-      --accent: #0ea5e9;
-      --accent-dark: #0284c7;
-      --text: #0f172a;
-      --shadow: 0 6px 18px rgba(2,6,23,0.08);
-      --radius: 10px;
-    }
-    body{
-      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      background: linear-gradient(180deg,#f8fafc, #eef2f7);
-      color: var(--text);
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f3f8;
+      color: #222;
       margin: 0;
-      padding: 24px;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
-
-    h1{font-size:20px;margin:0 0 10px}
-    .layout {
-      max-width: 1100px;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: 1fr 420px;
-      gap: 18px;
-      align-items: start;
+    h1 {
+      margin-top: 20px;
+      color: #2a4d69;
     }
-
-    .card {
-      background: var(--card);
-      border-radius: var(--radius);
-      padding: 14px;
-      box-shadow: var(--shadow);
-      border: 1px solid rgba(2,6,23,0.04);
-    }
-
     .controls {
-      display:flex;
-      flex-direction:column;
-      gap:12px;
+      margin: 20px;
+      background: #fff;
+      padding: 15px 25px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
     }
-    .control-row { display:flex; gap:8px; align-items:center; }
-    label { min-width:120px; color:var(--muted); font-size:13px; }
-    input[type="range"] { width: 100%; }
-    input[type="number"] { width:100px; padding:6px; border-radius:6px; border:1px solid #e6eef6; }
-
-    #plots { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
-    #plots .plot { min-height:260px; }
-
+    .controls label {
+      margin-right: 15px;
+    }
     .road {
-      width:100%;
-      height:180px;
-      border-radius:8px;
-      background: linear-gradient(90deg,#e6eef6,#fff);
-      position:relative;
-      overflow:hidden;
-      border:1px solid rgba(2,6,23,0.04);
+      position: relative;
+      width: 800px;
+      height: 100px;
+      background: #555;
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 20px 0;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
     }
-
-    .road-canvas { width:100%; height:100%; display:block; }
-
-    .small { font-size:13px; color:var(--muted); }
-
-    .controls .row-buttons { display:flex; gap:8px; }
-    button {
-      padding:8px 12px;
-      border-radius:8px;
-      border: none;
-      background: var(--accent);
-      color:white;
-      cursor:pointer;
-      font-weight:600;
+    .lane-line {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: repeating-linear-gradient(to right, #fff 0 20px, transparent 20px 40px);
+      transform: translateY(-50%);
+      opacity: 0.7;
     }
-    button.secondary { background:#e6eef6; color:var(--accent-dark); font-weight:600; }
-    .footer { margin-top:14px; font-size:13px; color:var(--muted); }
-
-    @media (max-width: 980px){
-      .layout { grid-template-columns: 1fr; }
-      #plots { grid-template-columns: 1fr; }
+    .vehicle {
+      position: absolute;
+      width: 30px;
+      height: 15px;
+      border-radius: 3px;
+      background: #ffcc00;
+      top: 20px;
+    }
+    .graphs {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 25px;
+    }
+    canvas {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     }
   </style>
 </head>
 <body>
-  <div style="max-width:1100px;margin:0 auto 18px;">
-    <h1>TRAFFIC FLOW THEORY (Greenshields Fundamental Diagram)</h1>
-    <div class="small">
-      <p>
-        Built for interactive demonstration of the <strong>Greenshields Traffic Flow Model</strong>.<br>
-        Please cite as:<br>
-        <em>Ollero, L. J. (2025). Traffic Flow Theory: Greenshields Model Interactive Visualization.</em><br>
-        Available at: 
-        <a href="https://lesterjayollero.github.io/TrafficFlowTheory.github.io" target="_blank">
-          https://lesterjayollero.github.io/TrafficFlowTheory.github.io
-        </a>
-      </p>
-    </div>
+  <h1>Greenshields Traffic Flow Model</h1>
+  <div class="controls">
+    <label>Free-flow speed (uf): <input type="range" id="uf" min="40" max="120" value="100"> <span id="ufVal">100</span> km/h</label>
+    <label>Jam density (kj): <input type="range" id="kj" min="50" max="300" value="150"> <span id="kjVal">150</span> veh/km</label>
   </div>
 
-  <div class="layout">
-    <!-- LEFT -->
-    <div class="card">
-      <div id="plots">
-        <div id="plot-vk" class="plot"></div>
-        <div id="plot-vq" class="plot"></div>
-        <div id="plot-qk" class="plot" style="grid-column: 1 / -1;"></div>
-      </div>
-
-      <div style="margin-top:12px" class="card">
-        <div style="display:flex;align-items:center;justify-content:space-between">
-          <div><strong>Road animation</strong><div class="small">Vehicles move along a straight 3-lane road segment.</div></div>
-          <div class="small" id="status-density">Density: — veh/km</div>
-        </div>
-        <div class="road" id="road"><canvas id="roadCanvas" class="road-canvas"></canvas></div>
-      </div>
-    </div>
-
-    <!-- RIGHT -->
-    <div class="controls">
-      <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <div><strong>Model parameters</strong><div class="small">Change free-flow speed &amp; jam density</div></div>
-          <div><button id="resetBtn" class="secondary">Reset</button></div>
-        </div>
-        <div style="margin-top:10px">
-          <div class="control-row">
-            <label for="vf">Free-flow speed (v<sub>f</sub>)</label>
-            <input id="vf" type="number" min="10" max="200" step="1" value="60"> <span class="small" style="margin-left:8px">km/h</span>
-          </div>
-          <div class="control-row" style="margin-top:8px">
-            <label for="kj">Jam density (k<sub>j</sub>)</label>
-            <input id="kj" type="number" min="50" max="400" step="1" value="150"> <span class="small" style="margin-left:8px">veh/km</span>
-          </div>
-          <div class="control-row" style="margin-top:8px">
-            <label for="roadLen">Road length</label>
-            <input id="roadLen" type="number" min="0.1" max="10" step="0.1" value="1.0"> <span class="small" style="margin-left:8px">km</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <strong>Operating density</strong>
-        <div class="small" style="margin-bottom:8px">Set the system density (vehicles per km). This controls vehicle count and operating point.</div>
-        <div style="display:flex;gap:8px;align-items:center">
-          <input id="densityRange" type="range" min="0" max="150" step="1" value="20">
-          <div style="width:70px;text-align:right"><input id="densityNumber" type="number" min="0" max="150" step="1" value="20"></div>
-        </div>
-        <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
-          <div class="row-buttons">
-            <button id="playBtn">Play</button>
-            <button id="pauseBtn" class="secondary">Pause</button>
-          </div>
-          <div style="margin-left:auto" class="small" id="oper-info">v = — km/h • q = — veh/h</div>
-        </div>
-      </div>
-
-      <div class="card small">
-        <strong>Notes</strong><br><br>
-        - Greenshields is linear; maximum flow occurs at k = k<sub>j</sub>/2 for this model (q_max = v_f * k_j / 4).<br>
-        - Vehicle animation uses v(k) converted to m/s to move vehicles along a straight 3-lane road.
-      </div>
-    </div>
+  <div class="road" id="road">
+    <div class="lane-line"></div>
   </div>
 
-<script>
-const plotVK=document.getElementById('plot-vk');
-const plotVQ=document.getElementById('plot-vq');
-const plotQK=document.getElementById('plot-qk');
-const vfInput=document.getElementById('vf');
-const kjInput=document.getElementById('kj');
-const densityRange=document.getElementById('densityRange');
-const densityNumber=document.getElementById('densityNumber');
-const roadLenInput=document.getElementById('roadLen');
-const playBtn=document.getElementById('playBtn');
-const pauseBtn=document.getElementById('pauseBtn');
-const resetBtn=document.getElementById('resetBtn');
-const operInfo=document.getElementById('oper-info');
-const statusDensity=document.getElementById('status-density');
-const roadCanvas=document.getElementById('roadCanvas');
-const roadCtx=roadCanvas.getContext('2d');
-const roadEl=document.getElementById('road');
+  <div class="graphs">
+    <canvas id="speedDensity" width="350" height="250"></canvas>
+    <canvas id="speedVolume" width="350" height="250"></canvas>
+    <canvas id="volumeDensity" width="350" height="250"></canvas>
+  </div>
 
-let width=roadEl.clientWidth, height=roadEl.clientHeight;
-roadCanvas.width=Math.floor(width*devicePixelRatio);
-roadCanvas.height=Math.floor(height*devicePixelRatio);
-roadCtx.scale(devicePixelRatio,devicePixelRatio);
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const ufInput = document.getElementById('uf');
+    const kjInput = document.getElementById('kj');
+    const ufVal = document.getElementById('ufVal');
+    const kjVal = document.getElementById('kjVal');
 
-let vf=Number(vfInput.value), kj=Number(kjInput.value), roadLen=Number(roadLenInput.value);
-let density=Number(densityRange.value);
-let playAnimation=true, lastTime=performance.now();
-let vehicles=[];
+    let uf = parseFloat(ufInput.value);
+    let kj = parseFloat(kjInput.value);
 
-function linspace(a,b,n){const out=[],step=(b-a)/(n-1);for(let i=0;i<n;i++)out.push(a+step*i);return out;}
-function greenshields_v(k,vf_local,kj_local){return Math.max(0,vf_local*(1-k/kj_local));}
-function computeSeries(vf_local,kj_local){
-  const ks=linspace(0,kj_local,201);
-  const vs=ks.map(k=>greenshields_v(k,vf_local,kj_local));
-  const qs=ks.map((k,i)=>k*vs[i]);
-  return {ks,vs,qs};
-}
-let dataModel=computeSeries(vf,kj);
+    ufInput.oninput = () => { uf = parseFloat(ufInput.value); ufVal.textContent = uf; updateModel(); };
+    kjInput.oninput = () => { kj = parseFloat(kjInput.value); kjVal.textContent = kj; updateModel(); };
 
-function drawPlots(){
-  const {ks,vs,qs}=dataModel;
-  const v=greenshields_v(density,vf,kj), q=density*v;
-  Plotly.newPlot(plotVK,[{x:ks,y:vs,mode:'lines',line:{color:'#0ea5e9'}},
-    {x:[density],y:[v],mode:'markers',marker:{size:10,color:'#034ea2'}}],
-    {title:'Speed vs Density (v(k))',height:280,margin:{t:40,l:50,r:10,b:40},xaxis:{title:'density (veh/km)'},yaxis:{title:'speed (km/h)'}},{displayModeBar:false});
-  Plotly.newPlot(plotVQ,[{x:qs,y:vs,mode:'lines',line:{color:'#0ea5e9'}},
-    {x:[q],y:[v],mode:'markers',marker:{size:10,color:'#034ea2'}}],
-    {title:'Speed vs Volume (v(q))',height:280,margin:{t:40,l:50,r:10,b:40},xaxis:{title:'volume (veh/h)'},yaxis:{title:'speed (km/h)'}},{displayModeBar:false});
-  Plotly.newPlot(plotQK,[{x:ks,y:qs,mode:'lines',line:{color:'#0ea5e9'}},
-    {x:[density],y:[q],mode:'markers',marker:{size:10,color:'#034ea2'}}],
-    {title:'Volume vs Density (q(k))',height:260,margin:{t:40,l:50,r:10,b:40},xaxis:{title:'density (veh/km)'},yaxis:{title:'volume (veh/h)'}},{displayModeBar:false});
-  operInfo.textContent=`v=${v.toFixed(2)} km/h • q=${q.toFixed(1)} veh/h`;
-  statusDensity.textContent=`Density: ${density.toFixed(0)} veh/km`;
-}
+    // Greenshields model equations
+    function greenshields(k) {
+      const v = uf * (1 - k / kj);
+      const q = k * v;
+      return { v, q };
+    }
 
-function recreateVehicles(){
-  const N=Math.round(density*roadLen);
-  vehicles=[];
-  for(let i=0;i<N;i++){
-    vehicles.push({
-      x:(i/N)*width,
-      lane:Math.floor(Math.random()*3),
-      color:'#034ea2'
+    // Prepare data arrays
+    function getData() {
+      const data = [];
+      for (let k = 0; k <= kj; k += kj / 100) {
+        data.push({ k, ...greenshields(k) });
+      }
+      return data;
+    }
+
+    // Setup Charts
+    const ctx1 = document.getElementById('speedDensity');
+    const ctx2 = document.getElementById('speedVolume');
+    const ctx3 = document.getElementById('volumeDensity');
+
+    const makeChart = (ctx, labelX, labelY, dataFn) => new Chart(ctx, {
+      type: 'line',
+      data: { datasets: [{ label: '', borderColor: '#2a4d69', data: [], fill: false }] },
+      options: {
+        animation: false,
+        responsive: false,
+        scales: {
+          x: { title: { display: true, text: labelX } },
+          y: { title: { display: true, text: labelY } }
+        }
+      }
     });
-  }
-}
 
-function drawRoad(){
-  roadCtx.clearRect(0,0,width,height);
-  const laneCount=3;
-  const laneH=height/(laneCount+1);
-  const laneY=(i)=>laneH*(i+1);
+    const chartSD = makeChart(ctx1, 'Density (veh/km)', 'Speed (km/h)');
+    const chartSV = makeChart(ctx2, 'Speed (km/h)', 'Volume (veh·km/h)');
+    const chartVD = makeChart(ctx3, 'Density (veh/km)', 'Volume (veh·km/h)');
 
-  // Draw lanes
-  for(let i=0;i<laneCount;i++){
-    roadCtx.fillStyle='#e8edf5';
-    roadCtx.fillRect(0,laneY(i)-laneH/2,width,laneH*0.8);
-    roadCtx.setLineDash([10,10]);
-    roadCtx.strokeStyle='rgba(255,255,255,0.5)';
-    roadCtx.beginPath();
-    roadCtx.moveTo(0,laneY(i)+laneH/2);
-    roadCtx.lineTo(width,laneY(i)+laneH/2);
-    roadCtx.stroke();
-  }
-  roadCtx.setLineDash([]);
+    // Update all charts
+    function updateModel() {
+      const data = getData();
+      chartSD.data.datasets[0].data = data.map(d => ({ x: d.k, y: d.v }));
+      chartSV.data.datasets[0].data = data.map(d => ({ x: d.v, y: d.q }));
+      chartVD.data.datasets[0].data = data.map(d => ({ x: d.k, y: d.q }));
+      chartSD.update();
+      chartSV.update();
+      chartVD.update();
+    }
 
-  const curV=greenshields_v(density,vf,kj);
-  const curV_ms=curV*1000/3600;
-  const pxPerM=(width)/(roadLen*1000);
-  const dt=Math.min(0.04,(performance.now()-lastTime)/1000);
-  lastTime=performance.now();
+    updateModel();
 
-  for(let veh of vehicles){
-    veh.x+=curV_ms*dt*pxPerM;
-    if(veh.x>width+20) veh.x=-20; // loop back
-    const y=laneY(veh.lane);
-    roadCtx.fillStyle=veh.color;
-    roadCtx.beginPath();
-    roadCtx.roundRect(veh.x, y-5, 12, 10, 2);
-    roadCtx.fill();
-  }
+    // Road animation
+    const road = document.getElementById('road');
+    const numVehicles = 10;
+    const vehicles = [];
+    const lanes = [25, 60];
 
-  roadCtx.fillStyle='rgba(2,6,23,0.06)';
-  roadCtx.fillRect(12,12,220,48);
-  roadCtx.fillStyle='#06202b';
-  roadCtx.font='13px Inter, Arial';
-  const q=density*curV;
-  roadCtx.fillText(`k=${density.toFixed(0)} veh/km`,20,30);
-  roadCtx.fillText(`v=${curV.toFixed(2)} km/h`,20,46);
-}
+    for (let i = 0; i < numVehicles; i++) {
+      const div = document.createElement('div');
+      div.className = 'vehicle';
+      div.style.top = lanes[i % 2] + 'px';
+      div.style.background = i % 2 ? '#4CAF50' : '#FFCC00';
+      road.appendChild(div);
+      vehicles.push({ el: div, x: Math.random() * 800 });
+    }
 
-function tick(){
-  if(playAnimation) drawRoad();
-  requestAnimationFrame(tick);
-}
+    function animateRoad() {
+      vehicles.forEach(v => {
+        v.x += (uf / 3.6) * 0.5; // convert km/h to px/frame scale
+        if (v.x > 830) v.x = -40;
+        v.el.style.left = v.x + 'px';
+      });
+      requestAnimationFrame(animateRoad);
+    }
+    animateRoad();
 
-// Event handling
-densityRange.oninput=()=>{density=Number(densityRange.value);densityNumber.value=density;drawPlots();recreateVehicles();}
-densityNumber.onchange=()=>{density=Number(densityNumber.value);densityRange.value=density;drawPlots();recreateVehicles();}
-vfInput.onchange=()=>{vf=Number(vfInput.value);dataModel=computeSeries(vf,kj);drawPlots();recreateVehicles();}
-kjInput.onchange=()=>{kj=Number(kjInput.value);densityRange.max=kj;densityNumber.max=kj;dataModel=computeSeries(vf,kj);drawPlots();recreateVehicles();}
-roadLenInput.onchange=()=>{roadLen=Number(roadLenInput.value);recreateVehicles();}
-pauseBtn.onclick=()=>{playAnimation=false;}
-playBtn.onclick=()=>{playAnimation=true;}
-resetBtn.onclick=()=>{
-  vf=60;kj=150;roadLen=1.0;density=20;
-  vfInput.value=60;kjInput.value=150;roadLenInput.value=1.0;densityRange.value=20;densityNumber.value=20;
-  dataModel=computeSeries(vf,kj);drawPlots();recreateVehicles();
-};
-
-drawPlots();
-recreateVehicles();
-tick();
-</script>
+    // Animated graph point
+    let t = 0;
+    function animateGraphs() {
+      const data = getData();
+      const index = Math.floor((t % 100));
+      const d = data[index];
+      [chartSD, chartSV, chartVD].forEach((chart, i) => {
+        chart.data.datasets[1] = {
+          label: 'Current',
+          data: i === 0 ? [{ x: d.k, y: d.v }]
+               : i === 1 ? [{ x: d.v, y: d.q }]
+               : [{ x: d.k, y: d.q }],
+          pointRadius: 6,
+          borderWidth: 0,
+          backgroundColor: '#e74c3c'
+        };
+        chart.update();
+      });
+      t = (t + 1) % 100;
+      requestAnimationFrame(animateGraphs);
+    }
+    animateGraphs();
+  </script>
 </body>
 </html>
