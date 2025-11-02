@@ -26,7 +26,6 @@
       -webkit-font-smoothing:antialiased;
       -moz-osx-font-smoothing:grayscale;
     }
-
     h1{font-size:20px;margin:0 0 10px}
     .layout {
       max-width: 1100px;
@@ -36,7 +35,6 @@
       gap: 18px;
       align-items: start;
     }
-
     .card {
       background: var(--card);
       border-radius: var(--radius);
@@ -44,21 +42,17 @@
       box-shadow: var(--shadow);
       border: 1px solid rgba(2,6,23,0.04);
     }
-
     .controls {
       display:flex;
       flex-direction:column;
       gap:12px;
     }
-
     .control-row { display:flex; gap:8px; align-items:center; }
     label { min-width:120px; color:var(--muted); font-size:13px; }
     input[type="range"] { width: 100%; }
     input[type="number"] { width:100px; padding:6px; border-radius:6px; border:1px solid #e6eef6; }
-
     #plots { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
     #plots .plot { min-height:260px; background:transparent; }
-
     .road {
       width:100%;
       height:180px;
@@ -69,11 +63,8 @@
       overflow:hidden;
       border:1px solid rgba(2,6,23,0.04);
     }
-
     .road-canvas { width:100%; height:100%; display:block; }
-
     .small { font-size:13px; color:var(--muted); }
-
     .controls .row-buttons { display:flex; gap:8px; }
     button {
       padding:8px 12px;
@@ -86,7 +77,6 @@
     }
     button.secondary { background:#e6eef6; color:var(--accent-dark); font-weight:600; }
     .footer { margin-top:14px; font-size:13px; color:var(--muted); }
-
     @media (max-width: 980px){
       .layout { grid-template-columns: 1fr; }
       #plots { grid-template-columns: 1fr; }
@@ -94,13 +84,13 @@
   </style>
 
   <!-- MathJax for LaTeX rendering -->
-<script>
-  MathJax = {
-    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
-    svg: { fontCache: 'global' }
-  };
-</script>
-<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script>
+    MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 </head>
 
 <body>
@@ -186,20 +176,16 @@
 const plotUK = document.getElementById('plot-uk');
 const plotUQ = document.getElementById('plot-uq');
 const plotQK = document.getElementById('plot-qk');
-
 const vfInput = document.getElementById('vf');
 const kjInput = document.getElementById('kj');
 const densityRange = document.getElementById('densityRange');
 const densityNumber = document.getElementById('densityNumber');
 const roadLenInput = document.getElementById('roadLen');
-
 const playBtn = document.getElementById('playBtn');
 const pauseBtn = document.getElementById('pauseBtn');
 const resetBtn = document.getElementById('resetBtn');
-
 const operInfo = document.getElementById('oper-info');
 const statusDensity = document.getElementById('status-density');
-
 const roadCanvas = document.getElementById('roadCanvas');
 const roadCtx = roadCanvas.getContext('2d');
 const roadEl = document.getElementById('road');
@@ -221,32 +207,18 @@ let kj = Number(kjInput.value);
 let roadLen = Number(roadLenInput.value);
 let density = Number(densityRange.value);
 
-// Helper functions
 function linspace(a,b,n){const out=[];const step=(b-a)/(n-1);for(let i=0;i<n;i++) out.push(a+step*i);return out;}
 function greenshields_u(k, uf, kj){const u = uf*(1 - k/kj);return Math.max(0, u);}
 function computeSeries(uf, kj){const ks=linspace(0,kj,201);const us=ks.map(k=>greenshields_u(k,uf,kj));const qs=ks.map((k,i)=>k*us[i]);return {ks,us,qs};}
-
 let dataModel = computeSeries(vf, kj);
 
 function drawPlots(){
   const { ks, us, qs } = dataModel;
   const curU = greenshields_u(density, vf, kj);
   const curQ = density * curU;
-
-  Plotly.newPlot(plotUK, [
-    {x:ks,y:us,mode:'lines',line:{color:'#0ea5e9'}},
-    {x:[density],y:[curU],mode:'markers',marker:{size:10,color:'#034ea2'}}
-  ], {title:'Speed vs Density (u(k))',xaxis:{title:'k (veh/km)'},yaxis:{title:'u (km/hr)'},height:280},{displayModeBar:false});
-
-  Plotly.newPlot(plotUQ, [
-    {x:qs,y:us,mode:'lines',line:{color:'#0ea5e9'}},
-    {x:[curQ],y:[curU],mode:'markers',marker:{size:10,color:'#034ea2'}}
-  ], {title:'Speed vs Volume (u(q))',xaxis:{title:'q (veh/hr)'},yaxis:{title:'u (km/hr)'},height:280},{displayModeBar:false});
-
-  Plotly.newPlot(plotQK, [
-    {x:ks,y:qs,mode:'lines',line:{color:'#0ea5e9'}},
-    {x:[density],y:[curQ],mode:'markers',marker:{size:10,color:'#034ea2'}}
-  ], {title:'Volume vs Density (q(k))',xaxis:{title:'k (veh/km)'},yaxis:{title:'q (veh/hr)'},height:260},{displayModeBar:false});
+  Plotly.newPlot(plotUK,[{x:ks,y:us,mode:'lines',line:{color:'#0ea5e9'}},{x:[density],y:[curU],mode:'markers',marker:{size:10,color:'#034ea2'}}],{title:'Speed vs Density (u(k))',xaxis:{title:'k (veh/km)'},yaxis:{title:'u (km/hr)'},height:280},{displayModeBar:false});
+  Plotly.newPlot(plotUQ,[{x:qs,y:us,mode:'lines',line:{color:'#0ea5e9'}},{x:[curQ],y:[curU],mode:'markers',marker:{size:10,color:'#034ea2'}}],{title:'Speed vs Volume (u(q))',xaxis:{title:'q (veh/hr)'},yaxis:{title:'u (km/hr)'},height:280},{displayModeBar:false});
+  Plotly.newPlot(plotQK,[{x:ks,y:qs,mode:'lines',line:{color:'#0ea5e9'}},{x:[density],y:[curQ],mode:'markers',marker:{size:10,color:'#034ea2'}}],{title:'Volume vs Density (q(k))',xaxis:{title:'k (veh/km)'},yaxis:{title:'q (veh/hr)'},height:260},{displayModeBar:false});
 }
 
 function updatePlots(){
@@ -292,7 +264,6 @@ function drawRoad(){
   const a=rx,b=ry;
   const circumferencePx = Math.PI * (3*(a+b) - Math.sqrt((3*a + b)*(a + 3*b)));
   const meters=roadLen*1000;
-  const pxPerMeter=circumferencePx/meters;
   const dt=Math.min(0.04,(performance.now()-lastTime)/1000);
   lastTime=performance.now();
 
@@ -311,7 +282,6 @@ function drawRoad(){
     roadCtx.ellipse(x,y,6,4,0,0,Math.PI*2);
     roadCtx.fill();
   }
-
   roadCtx.restore();
 }
 
@@ -320,13 +290,12 @@ function tick(){
   requestAnimationFrame(tick);
 }
 
-// UI interactions
+// Event listeners
 densityRange.addEventListener('input', ()=>{density=Number(densityRange.value);densityNumber.value=density;updatePlots();recreateVehicles();});
 densityNumber.addEventListener('change', ()=>{density=Number(densityNumber.value);densityRange.value=density;updatePlots();recreateVehicles();});
 vfInput.addEventListener('change', ()=>{vf=Number(vfInput.value);dataModel=computeSeries(vf,kj);updatePlots();recreateVehicles();});
 kjInput.addEventListener('change', ()=>{kj=Number(kjInput.value);densityRange.max=kj;densityNumber.max=kj;dataModel=computeSeries(vf,kj);updatePlots();recreateVehicles();});
 roadLenInput.addEventListener('change', ()=>{roadLen=Number(roadLenInput.value);recreateVehicles();});
-
 playBtn.addEventListener('click',()=>{playAnimation=true;});
 pauseBtn.addEventListener('click',()=>{playAnimation=false;});
 resetBtn.addEventListener('click',()=>{
@@ -334,3 +303,13 @@ resetBtn.addEventListener('click',()=>{
   vf=60;kj=150;roadLen=1.0;
   density=20;densityRange.value=20;densityNumber.value=20;
   dataModel=computeSeries(vf,kj);
+  updatePlots();
+  recreateVehicles();
+});
+
+drawPlots();
+recreateVehicles();
+tick();
+</script>
+</body>
+</html>
